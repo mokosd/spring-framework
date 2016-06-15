@@ -166,12 +166,18 @@ public class UrlPathHelper {
 	private static ConcurrentHashMap<Integer, String> dispatchMap = new ConcurrentHashMap<Integer, String>();
 
     private void setDispatchMap(HttpServletRequest request){
+    	
         Object enableOrgTypeDispatch = request.getServletContext().getAttribute("enableOrgTypeDispatch");
         Object orgTypeDispatchList = request.getServletContext().getAttribute("orgTypeDispatchList");
         boolean isEnableDisp = false;
         if(enableOrgTypeDispatch!=null){
             isEnableDisp = Boolean.parseBoolean(enableOrgTypeDispatch+"");
         }
+
+        if(!isEnableDisp){
+        	return;
+        }
+
         if(isEnableDisp && orgTypeDispatchList==null){
             throw new IllegalStateException("enabled orgType dispatch, but not set orgTypeDispatchList:"+orgTypeDispatchList);
         }
@@ -210,10 +216,13 @@ public class UrlPathHelper {
 
 		// if the app container sanitized the servletPath, check against the sanitized version
 		if (servletPath.indexOf(sanitizedPathWithinApp) != -1) {
-			path = "/" + pathPrefix + getRemainingPath(sanitizedPathWithinApp, servletPath, false);
+			path = getRemainingPath(sanitizedPathWithinApp, servletPath, false);
 		}
 		else {
-			path = "/" + pathPrefix + getRemainingPath(pathWithinApp, servletPath, false);
+			path = getRemainingPath(pathWithinApp, servletPath, false);
+		}
+		if(pathPrefix!=null && !pathPrefix.equals("")){
+			path = "/" + pathPrefix + path;
 		}
 		if (path != null) {
 			// Normal case: URI contains servlet path.
