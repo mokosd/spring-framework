@@ -264,6 +264,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private static final String DEFAULT_STRATEGIES_PATH = "DispatcherServlet.properties";
 
+	
 
 	/** Additional logger to use when no mapped handler is found for a request. */
 	protected static final Log pageNotFoundLogger = LogFactory.getLog(PAGE_NOT_FOUND_LOG_CATEGORY);
@@ -282,6 +283,8 @@ public class DispatcherServlet extends FrameworkServlet {
 			throw new IllegalStateException("Could not load 'DispatcherServlet.properties': " + ex.getMessage());
 		}
 	}
+
+	
 
 	/** Detect all HandlerMappings or just expect "handlerMapping" bean? */
 	private boolean detectAllHandlerMappings = true;

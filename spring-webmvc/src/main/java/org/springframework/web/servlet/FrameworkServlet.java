@@ -214,6 +214,27 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	private boolean refreshEventReceived = false;
 
 
+	private boolean enableOrgTypeDispatch = false;
+
+    private String orgTypeDispatchList;
+
+    public String getOrgTypeDispatchList() {
+        return orgTypeDispatchList;
+    }
+
+    public void setOrgTypeDispatchList(String orgTypeDispatchList) {
+        this.orgTypeDispatchList = orgTypeDispatchList;
+    }
+
+    public boolean isEnableOrgTypeDispatch() {
+        return enableOrgTypeDispatch;
+    }
+
+    public void setEnableOrgTypeDispatch(boolean enableOrgTypeDispatch) {
+        this.enableOrgTypeDispatch = enableOrgTypeDispatch;
+    }
+
+
 	/**
 	 * Create a new {@code FrameworkServlet} that will create its own internal web
 	 * application context based on defaults and values provided through servlet
@@ -564,6 +585,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			// Publish the context as a servlet context attribute.
 			String attrName = getServletContextAttributeName();
 			getServletContext().setAttribute(attrName, wac);
+			getServletContext().setAttribute("enableOrgTypeDispatch", isEnableOrgTypeDispatch());
+            getServletContext().setAttribute("orgTypeDispatchList",getOrgTypeDispatchList());
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Published WebApplicationContext of servlet '" + getServletName() +
 						"' as ServletContext attribute with name [" + attrName + "]");

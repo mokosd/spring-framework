@@ -129,7 +129,7 @@ configure(allprojects) { project ->
 	}
 
 	repositories {
-		maven { url "https://repo.spring.io/libs-release" }
+		maven { url "http://115.29.208.92:8081/nexus/content/groups/public/" }
 	}
 
 	dependencies {

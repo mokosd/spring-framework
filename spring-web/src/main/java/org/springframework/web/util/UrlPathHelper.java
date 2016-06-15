@@ -30,6 +30,8 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.OrgTypeHelper;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Helper class for URL path matching. Provides support for URL paths in
@@ -160,6 +162,26 @@ public class UrlPathHelper {
 		}
 	}
 
+	private static ConcurrentHashMap<Integer, String> dispatchMap = new ConcurrentHashMap<Integer, String>();
+
+    private void setDispatchMap(HttpServletRequest request){
+        Object enableOrgTypeDispatch = request.getServletContext().getAttribute("enableOrgTypeDispatch");
+        Object orgTypeDispatchList = request.getServletContext().getAttribute("orgTypeDispatchList");
+        boolean isEnableDisp = false;
+        if(enableOrgTypeDispatch!=null){
+            isEnableDisp = Boolean.parseBoolean(enableOrgTypeDispatch+"");
+        }
+        if(isEnableDisp && orgTypeDispatchList==null){
+            throw new IllegalStateException("enabled orgType dispatch, but not set orgTypeDispatchList:"+orgTypeDispatchList);
+        }
+
+        String[] args = orgTypeDispatchList.toString().split(",");
+        for(String a : args){
+            String[] t = a.split(":");
+            dispatchMap.put(Integer.valueOf(t[0]), t[1]);
+        }
+    }
+
 	/**
 	 * Return the path within the servlet mapping for the given request,
 	 * i.e. the part of the request's URL beyond the part that called the servlet,
@@ -174,6 +196,56 @@ public class UrlPathHelper {
 	 * @return the path within the servlet mapping, or ""
 	 */
 	public String getPathWithinServletMapping(HttpServletRequest request) {
+		String pathWithinApp = getPathWithinApplication(request);
+		String servletPath = getServletPath(request);
+		String sanitizedPathWithinApp = getSanitizedPath(pathWithinApp);
+		String patht = dispatchMap.get(OrgTypeHelper.getOrgType());
+        if(patht==null){
+            setDispatchMap(request);
+            patht = dispatchMap.get(OrgTypeHelper.getOrgType());
+        }
+
+		String path;
+
+		// if the app container sanitized the servletPath, check against the sanitized version
+		if (servletPath.indexOf(sanitizedPathWithinApp) != -1) {
+			path = "/" + patht + getRemainingPath(sanitizedPathWithinApp, servletPath, false);
+		}
+		else {
+			path = "/" + patht + getRemainingPath(pathWithinApp, servletPath, false);
+		}
+
+		if (path != null) {
+			// Normal case: URI contains servlet path.
+			return path;
+		}
+		else {
+			// Special case: URI is different from servlet path.
+			String pathInfo = request.getPathInfo();
+			if (pathInfo != null) {
+				// Use path info if available. Indicates index page within a servlet mapping?
+				// e.g. with index page: URI="/", servletPath="/index.html"
+				return pathInfo;
+			}
+			if (!this.urlDecode) {
+				// No path info... (not mapped by prefix, nor by extension, nor "/*")
+				// For the default servlet mapping (i.e. "/"), urlDecode=false can
+				// cause issues since getServletPath() returns a decoded path.
+				// If decoding pathWithinApp yields a match just use pathWithinApp.
+				path = getRemainingPath(decodeInternal(request, pathWithinApp), servletPath, false);
+				if (path != null) {
+					return pathWithinApp;
+				}
+			}
+			// Otherwise, use the full servlet path.
+			return servletPath;
+		}
+	}
+
+	public String getPathWithinServletMapping(HttpServletRequest request, boolean includeOrgType) {
+		if(includeOrgType){
+			return getPathWithinServletMapping(request);
+		}
 		String pathWithinApp = getPathWithinApplication(request);
 		String servletPath = getServletPath(request);
 		String sanitizedPathWithinApp = getSanitizedPath(pathWithinApp);
