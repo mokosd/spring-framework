@@ -216,6 +216,10 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 	private boolean enableOrgTypeDispatch = false;
 
+	private static final String ENABLE_ORG_TYPE_DISPATCH_ATTRIBUTE = "enableOrgTypeDispatch";
+
+	private static final String ORG_TYPE_DISPATCH_LIST_ATTRIBUTE = "orgTypeDispatchList";
+
     private String orgTypeDispatchList;
 
     public String getOrgTypeDispatchList() {
@@ -585,8 +589,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			// Publish the context as a servlet context attribute.
 			String attrName = getServletContextAttributeName();
 			getServletContext().setAttribute(attrName, wac);
-			getServletContext().setAttribute("enableOrgTypeDispatch", isEnableOrgTypeDispatch());
-            getServletContext().setAttribute("orgTypeDispatchList",getOrgTypeDispatchList());
+			getServletContext().setAttribute(ENABLE_ORG_TYPE_DISPATCH_ATTRIBUTE, isEnableOrgTypeDispatch());
+            getServletContext().setAttribute(ORG_TYPE_DISPATCH_LIST_ATTRIBUTE, getOrgTypeDispatchList());
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Published WebApplicationContext of servlet '" + getServletName() +
 						"' as ServletContext attribute with name [" + attrName + "]");

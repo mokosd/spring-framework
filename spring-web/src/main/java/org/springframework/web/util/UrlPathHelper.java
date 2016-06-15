@@ -32,6 +32,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.OrgTypeHelper;
 import java.util.concurrent.ConcurrentHashMap;
+import java.io.File;
 
 /**
  * Helper class for URL path matching. Provides support for URL paths in
@@ -199,20 +200,20 @@ public class UrlPathHelper {
 		String pathWithinApp = getPathWithinApplication(request);
 		String servletPath = getServletPath(request);
 		String sanitizedPathWithinApp = getSanitizedPath(pathWithinApp);
-		String patht = dispatchMap.get(OrgTypeHelper.getOrgType());
-        if(patht==null){
+		String pathPrefix = dispatchMap.get(OrgTypeHelper.getOrgType());
+        if(pathPrefix==null){
             setDispatchMap(request);
-            patht = dispatchMap.get(OrgTypeHelper.getOrgType());
+            pathPrefix = dispatchMap.get(OrgTypeHelper.getOrgType());
         }
 
 		String path;
 
 		// if the app container sanitized the servletPath, check against the sanitized version
 		if (servletPath.indexOf(sanitizedPathWithinApp) != -1) {
-			path = "/" + patht + getRemainingPath(sanitizedPathWithinApp, servletPath, false);
+			path = File.separator + pathPrefix + getRemainingPath(sanitizedPathWithinApp, servletPath, false);
 		}
 		else {
-			path = "/" + patht + getRemainingPath(pathWithinApp, servletPath, false);
+			path = File.separator + pathPrefix + getRemainingPath(pathWithinApp, servletPath, false);
 		}
 
 		if (path != null) {
