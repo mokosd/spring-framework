@@ -210,12 +210,11 @@ public class UrlPathHelper {
 
 		// if the app container sanitized the servletPath, check against the sanitized version
 		if (servletPath.indexOf(sanitizedPathWithinApp) != -1) {
-			path = File.separator + pathPrefix + getRemainingPath(sanitizedPathWithinApp, servletPath, false);
+			path = "/" + pathPrefix + getRemainingPath(sanitizedPathWithinApp, servletPath, false);
 		}
 		else {
-			path = File.separator + pathPrefix + getRemainingPath(pathWithinApp, servletPath, false);
+			path = "/" + pathPrefix + getRemainingPath(pathWithinApp, servletPath, false);
 		}
-
 		if (path != null) {
 			// Normal case: URI contains servlet path.
 			return path;
